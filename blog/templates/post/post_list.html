@@ -1,8 +1,10 @@
 <h1>hello from post template</h1>
 <h2>Publishers</h2>
 <ul>
-    {% for publisher in object_list %}
-        <li>{{ publisher.title }}</li>
+    {% for post in object_list %}
+        <li>
+            <a href="{{post.get_absolute_url}}">{{ post.title }}</a>
+        </li>
     {% endfor %}
 </ul>
 <div class="pagination">

@@ -4,19 +4,21 @@ from .models import Post
 
 class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Faker('email')
+    
     class Meta:
         model = User
         django_get_or_create = ('username',)
+        skip_postgeneration_save = True
 
 class PostFactory(factory.django.DjangoModelFactory):
     title = factory.Faker('sentence', nb_words=12)
     sub_title = factory.Faker('sentence', nb_words=12)
     content = factory.Faker('paragraph', nb_sentences=5)
-    slug = factory.Faker('slug')
+    author = factory.SubFactory(UserFactory)
 
     class Meta:
         model = Post
-    author = factory.SubFactory(UserFactory)
+        skip_postgeneration_save = True
 
     @factory.post_generation
     def tags(self, create, extracted, **kargs):
