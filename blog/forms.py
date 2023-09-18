@@ -3,7 +3,7 @@ from .models import Post
 from django.core.mail import send_mail
 
 class PostShareForm(forms.Form):
-    email = forms.CharField(max_length=255)
+    email = forms.EmailField(max_length=255, widget=forms.TextInput())
 
     def send_email(self, post_url):
         return send_mail(

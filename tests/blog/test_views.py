@@ -42,6 +42,10 @@ class TestPostDetailView:
         response = client.get(reverse('blog.detail', args=[setup_one_item.slug]))
         assert response.status_code == 200
     
+    def test_view_uses_the_correct_template(self, client, setup_one_item):
+        response = client.get(reverse('blog.detail', args=[setup_one_item.slug]))
+        assert 'post/post_detail.html' in [ template.name for template in response.templates]
+    
     def test_view_returns_404_status_code_when_post_not_found(self, client):
         response = client.get(reverse('blog.detail', args=['non-exist-post']))
         assert response.status_code == 404
@@ -51,3 +55,31 @@ class TestPostDetailView:
         assert setup_one_item.title in response.rendered_content
         assert setup_one_item.sub_title in response.rendered_content
         assert setup_one_item.content in response.rendered_content
+
+@pytest.mark.django_db
+class TestPostShareView:
+    def test_view_returns_200_status_code_on_get_method(self, client, setup_one_item):
+        response = client.get(reverse('blog.share', args=[setup_one_item.slug]))
+        assert response.status_code == 200
+    
+    def test_view_uses_the_correct_template(self, client, setup_one_item):
+        response = client.get(reverse('blog.share', args=[setup_one_item.slug]))
+        assert 'post/post_share.html' in [ template.name for template in response.templates]
+    
+    def test_view_returns_404_status_code_when_post_not_found(self, client):
+        response = client.get(reverse('blog.share', args=['non-exist-post']))
+        assert response.status_code == 404
+    
+    def test_view_returns_302_status_code_with_valid_input_data(self, client, setup_one_item):
+        response = client.post(
+            reverse('blog.share', args=[setup_one_item.slug]),{
+                'email':'developer@gmail.com'
+            })
+        assert response.status_code == 302
+    
+    def test_view_renders_error_message_after_invalid_input(self, client, setup_one_item):
+        response = client.post(
+            reverse('blog.share', args=[setup_one_item.slug]),{
+                'email':'this is not an email'
+            })
+        assert 'Enter a valid email address' in response.rendered_content
