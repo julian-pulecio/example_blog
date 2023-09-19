@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post
+from .models import Comment
 from django.core.mail import send_mail
 
 class PostShareForm(forms.Form):
@@ -11,3 +11,8 @@ class PostShareForm(forms.Form):
                 message=f'Hello I want to share this post with you {post_url}',
                 from_email='your-email@mail.com',
                 recipient_list=[self.cleaned_data['email']])
+
+class CreateCommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['email','content']

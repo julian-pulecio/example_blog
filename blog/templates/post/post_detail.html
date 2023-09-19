@@ -1,3 +1,14 @@
 <h1>{{object.title}}</h1>
 <p>{{object.sub_title}}</p>
 <p>{{object.content}}</p>
+
+{% for comment in object.comments.all %}
+    <p>{{comment.email}}</p>
+    <p>{{comment.content}}</p>
+{% endfor %}
+
+<form action="{% url 'blog.comment' slug=object.slug %}" method="post">
+    {% csrf_token %}
+    {{form}}
+    <button type="submit">send</button>
+</form>

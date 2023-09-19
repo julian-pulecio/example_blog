@@ -1,6 +1,6 @@
 import factory
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Comment
 
 class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Faker('email')
@@ -9,6 +9,12 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
         django_get_or_create = ('username',)
         skip_postgeneration_save = True
+
+class CommentFactory(factory.django.DjangoModelFactory):
+    email = factory.Faker('email')
+    content = factory.Faker('sentence', nb_words=12)
+    class Meta:
+        model = Comment
 
 class PostFactory(factory.django.DjangoModelFactory):
     title = factory.Faker('sentence', nb_words=12)
@@ -26,4 +32,14 @@ class PostFactory(factory.django.DjangoModelFactory):
             return 
         else:
             for i in range(5):
-                self.tags.add(factory.Faker('name').__str__())
+                self.tags.add(str(factory.Faker('name')))
+    
+    @factory.post_generation
+    def comments(self, create, extracted, **kargs):
+        if not create:
+            return 
+        else:
+            for i in range(5):
+                self.comments.add(CommentFactory(
+                    post_id=self.id
+                ))
