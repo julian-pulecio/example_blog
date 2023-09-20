@@ -83,3 +83,15 @@ class TestPostShareView:
                 'email':'this is not an email'
             })
         assert 'Enter a valid email address' in response.rendered_content
+
+@pytest.mark.django_db
+class TestCreateCommentView:
+    def test_view_returns_302_status_code_on_valid_input(self, client, setup_one_item):
+        response = client.post(reverse('blog.comment', args=[setup_one_item.slug])
+                        , {'email':'developer@gmail.com', 'content':'content'})
+        assert response.status_code == 302
+    
+    def test_view_renders_errors_on_invalid_input(self, client, setup_one_item):
+        response = client.post(reverse('blog.comment', args=[setup_one_item.slug])
+                        , {'email':'invalid', 'content':'content'})
+        print(dir(response))

@@ -13,6 +13,7 @@ class PostShareForm(forms.Form):
                 recipient_list=[self.cleaned_data['email']])
 
 class CreateCommentForm(forms.ModelForm):
+    email = forms.EmailField(max_length=255, widget=forms.TextInput())
     class Meta:
         model = Comment
         fields = ['email','content']
