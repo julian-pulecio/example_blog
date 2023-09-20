@@ -55,43 +55,39 @@ class TestPostDetailView:
         assert setup_one_item.title in response.rendered_content
         assert setup_one_item.sub_title in response.rendered_content
         assert setup_one_item.content in response.rendered_content
+        assert 'create_comment_form' in response.context_data
+        assert 'post_share_form' in response.context_data
 
-@pytest.mark.django_db
-class TestPostShareView:
-    def test_view_returns_200_status_code_on_get_method(self, client, setup_one_item):
-        response = client.get(reverse('blog.share', args=[setup_one_item.slug]))
+    def test_post_detail_view_post_comment(self, client, setup_one_item):
+        comments_count = setup_one_item.comments.count()
+        response = client.post(
+            reverse('blog.detail',args=[setup_one_item.slug]),
+            data={'email': 'developer@julianpulecio.com', 'content': 'ASDASDAS', 'comment': ''}
+        )
+        assert response.status_code == 302
+        assert setup_one_item.comments.count() == comments_count + 1
+
+    def test_post_detail_view_share_post(self, client, setup_one_item):
+        response = client.post(
+            reverse('blog.detail',args=[setup_one_item.slug]),
+            data={'email': 'developer@julianpulecio.com', 'share': ''}
+        )
+        assert response.status_code == 302
+    
+    def test_post_detail_view_post_comment_form_render_errors(self, client, setup_one_item):
+        comments_count = setup_one_item.comments.count()
+        response = client.post(
+            reverse('blog.detail',args=[setup_one_item.slug]),
+            data={'email': 'this is not an email', 'content': 'ASDASDAS', 'comment': ''}
+        )
         assert response.status_code == 200
+        assert setup_one_item.comments.count() == comments_count
+        assert 'Enter a valid email address.' in response.rendered_content
     
-    def test_view_uses_the_correct_template(self, client, setup_one_item):
-        response = client.get(reverse('blog.share', args=[setup_one_item.slug]))
-        assert 'post/post_share.html' in [ template.name for template in response.templates]
-    
-    def test_view_returns_404_status_code_when_post_not_found(self, client):
-        response = client.get(reverse('blog.share', args=['non-exist-post']))
-        assert response.status_code == 404
-    
-    def test_view_returns_302_status_code_with_valid_input_data(self, client, setup_one_item):
+    def test_post_detail_view_share_post_form_render_errors(self, client, setup_one_item):
         response = client.post(
-            reverse('blog.share', args=[setup_one_item.slug]),{
-                'email':'developer@gmail.com'
-            })
-        assert response.status_code == 302
-    
-    def test_view_renders_error_message_after_invalid_input(self, client, setup_one_item):
-        response = client.post(
-            reverse('blog.share', args=[setup_one_item.slug]),{
-                'email':'this is not an email'
-            })
-        assert 'Enter a valid email address' in response.rendered_content
-
-@pytest.mark.django_db
-class TestCreateCommentView:
-    def test_view_returns_302_status_code_on_valid_input(self, client, setup_one_item):
-        response = client.post(reverse('blog.comment', args=[setup_one_item.slug])
-                        , {'email':'developer@gmail.com', 'content':'content'})
-        assert response.status_code == 302
-    
-    def test_view_renders_errors_on_invalid_input(self, client, setup_one_item):
-        response = client.post(reverse('blog.comment', args=[setup_one_item.slug])
-                        , {'email':'invalid', 'content':'content'})
-        print(dir(response))
+            reverse('blog.detail',args=[setup_one_item.slug]),
+            data={'email': 'this is not an email', 'share': ''}
+        )
+        assert response.status_code == 200
+        assert 'Enter a valid email address.' in response.rendered_content
