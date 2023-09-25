@@ -11,12 +11,23 @@ from .forms import PostShareForm, CreateCommentForm
 from .models import Post, Comment
 
 
-
-# Create your views here.
 class PostListView(ListView):
     model = Post
     paginate_by = 10
     template_name = 'post/post_list.html'
+
+    def get_queryset(self):
+        params = self.request.GET
+        if 'filter_field' and 'filter_value' in params:
+            filters = {params['filter_field'] + '__icontains':params['filter_value']}
+            new_context = Post.objects.filter(**filters)
+            return new_context
+        return super().get_queryset()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['params'] = self.request.GET
+        return context
 
 class PostDetailView(DetailView):
     model = Post

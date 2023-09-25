@@ -1,24 +1,52 @@
-<h1>hello from post template</h1>
-<h2>Publishers</h2>
-<ul>
+{% extends "../base.html" %}
+
+{% block title %} Home {% endblock %}
+
+{% block template %}
+    
+    {{params.filter_field}}
+
+    {% if page_obj.number == 1 %}
+    <form class="my-4 row" action="">
+        <div class="form-group col-6">
+            <label for="filter-title">Title</label>
+            <input type="text" id="hola" class="form-control"
+                placeholder="Title"
+                hx-get="{% url 'blog.list' %}?filter_field=title"
+                hx-trigger="keyup changed delay:500ms"
+                hx-swap="outerHTML"
+                hx-target="#search-results"
+                name="filter_value">
+            <small class="form-text text-muted">Search post by title.</small>
+        </div>
+    </form>
+    {% endif %}
+
+    <div id="search-results">
     {% for post in object_list %}
-        <li>
-            <a href="{{post.get_absolute_url}}">{{ post.title }}</a>
-        </li>
+        
+        <a href="{{post.get_absolute_url}}" class="text-decoration-none text-dark">
+        {% if forloop.last %}
+            <div class="card border-0 pb-3 pb-sm-5"
+                hx-get="{% url 'blog.list' %}?page={{page_obj.number|add:1}}&filter_field={{params.filter_field}}&filter_value={{params.filter_value}}"
+                hx-trigger="revealed"
+                hx-swap="afterend">
+        {% else %}
+            <div class="card border-0 pb-3 pb-sm-5">
+        {% endif %}
+                <div class="row">
+                    <div class="col-8">
+                        <div class="card-body p-0">
+                            <div class="pb-2 tex-body inf-scroll-author">{{post.author}}</div>
+                            <h1 class="mb-1 tex-body inf-scroll-title">{{post.title|truncatechars:80}}</h1>
+                            <h2 class="text-muted fs-6 d-none d-md-block">{{post.sub_title}}</h2>
+                            <div class="text-muted inf-scroll-date">{{post.updated_at|date:"M d"}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
     {% endfor %}
-</ul>
-<div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
+    </div>
 
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </span>
-
-        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">next</a>
-        {% endif %}
-    </span>
-</div>
+{% endblock %}
