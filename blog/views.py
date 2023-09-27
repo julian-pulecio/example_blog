@@ -6,10 +6,19 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormMixin
 from django.urls import reverse
-from django.views.generic import ListView, DetailView
-from .forms import PostShareForm, CreateCommentForm
+from django.views.generic import ListView, DetailView, TemplateView, FormView
+from .forms import PostShareForm, PostFilterListForm, CreateCommentForm
 from .models import Post, Comment
 
+
+class PostListFiltersView(FormView):
+    template_name = 'post/post_list_filters.html'
+    form_class = PostFilterListForm
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['filter_value'].widget.attrs['hx-get'] = reverse('blog.list') + '?filter_field=title'
+        return form
 
 class PostListView(ListView):
     model = Post

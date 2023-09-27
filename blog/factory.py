@@ -1,6 +1,9 @@
 import factory
+from faker import Faker
 from django.contrib.auth.models import User
 from .models import Post, Comment
+
+fake = Faker()
 
 class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Faker('email')
@@ -32,7 +35,7 @@ class PostFactory(factory.django.DjangoModelFactory):
             return 
         else:
             for i in range(5):
-                self.tags.add(str(factory.Faker('name')))
+                self.tags.add(fake.word())
     
     @factory.post_generation
     def comments(self, create, extracted, **kargs):
