@@ -31,11 +31,16 @@ class PostFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def tags(self, create, extracted, **kargs):
+        print('extracted')
+        print(extracted)
         if not create:
             return 
-        else:
+        if not extracted:
             for i in range(5):
                 self.tags.add(fake.word())
+        else:
+            for tag in extracted:
+                self.tags.add(tag)
     
     @factory.post_generation
     def comments(self, create, extracted, **kargs):

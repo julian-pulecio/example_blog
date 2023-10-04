@@ -15,6 +15,21 @@ def setup_five_items():
     _ = PostFactory.create_batch(5)
 
 @pytest.fixture()
+def setup_pre_set_three_items():
+    _ = PostFactory.create(
+        title = ' my post title one',
+        tags = ['tag1','post','tag3']
+    )
+    _ = PostFactory.create(
+        title = ' my post title two',
+        tags = ['tag3','post','tag5']
+    )
+    _ = PostFactory.create(
+        title = 'post title three',
+        tags = ['tag6','post','tag8']
+    )
+
+@pytest.fixture()
 def setup_one_hundred_items():
     _ = PostFactory.create_batch(100)
 
@@ -35,6 +50,41 @@ class TestPostListView:
     def test_view_pagination_for_one_hundred_post(self, client, setup_one_hundred_items):
         response = client.get(reverse('blog.list'), {'page': '2'})
         assert len(response.context.get('object_list')) == 10
+    
+    def test_view_title_filter(self, client, setup_pre_set_three_items):
+        response = client.get(reverse('blog.list'), {'title_filter': 'one'})
+        assert len(response.context.get('object_list')) == 1
+
+        response = client.get(reverse('blog.list'), {'title_filter': 'my'})
+        assert len(response.context.get('object_list')) == 2
+
+        response = client.get(reverse('blog.list'), {'title_filter': 'post'})
+        assert len(response.context.get('object_list')) == 3
+
+        response = client.get(reverse('blog.list'), {'title_filter': 'non existing post'})
+        assert len(response.context.get('object_list')) == 0
+    
+    def test_view_tags_filter(self, client, setup_pre_set_three_items):
+        
+        response = client.get(reverse('blog.list'), {'tags_filter': 'tag1'})    
+        assert len(response.context.get('object_list')) == 1
+        
+        response = client.get(reverse('blog.list'), {'tags_filter': 'tag3'})    
+        assert len(response.context.get('object_list')) == 2
+        
+        response = client.get(reverse('blog.list'), {'tags_filter': 'post'})    
+        assert len(response.context.get('object_list')) == 3
+        
+        response = client.get(reverse('blog.list'), {'tags_filter': 'non existing tag'})    
+        assert len(response.context.get('object_list')) == 0
+
+    def test_view_tags_filter_and_title_filter(self, client, setup_pre_set_three_items):
+        
+        response = client.get(reverse('blog.list'), {'tags_filter': 'tag3', 'title_filter': 'title'})    
+        assert len(response.context.get('object_list')) == 2
+
+        response = client.get(reverse('blog.list'), {'tags_filter': 'tag3', 'title_filter': 'one'})    
+        assert len(response.context.get('object_list')) == 1
 
 @pytest.mark.django_db
 class TestPostDetailView:
