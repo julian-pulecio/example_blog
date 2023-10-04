@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'taggit',
     'blog.apps.BlogConfig',
     'django_htmx',
-    'bootstrap5'
+    'bootstrap5',
 ]
 
 MIDDLEWARE = [

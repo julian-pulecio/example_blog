@@ -7,18 +7,15 @@ from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormMixin
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, TemplateView, FormView
+from django.db.models import Q
 from .forms import PostShareForm, PostFilterListForm, CreateCommentForm
 from .models import Post, Comment
+
 
 
 class PostListFiltersView(FormView):
     template_name = 'post/post_list_filters.html'
     form_class = PostFilterListForm
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.fields['filter_value'].widget.attrs['hx-get'] = reverse('blog.list') + '?filter_field=title'
-        return form
 
 class PostListView(ListView):
     model = Post
@@ -26,11 +23,24 @@ class PostListView(ListView):
     template_name = 'post/post_list.html'
 
     def get_queryset(self):
-        params = self.request.GET
-        if 'filter_field' and 'filter_value' in params:
-            filters = {params['filter_field'] + '__icontains':params['filter_value']}
-            new_context = Post.objects.filter(**filters)
+        tags_filter = self.request.GET.get('tags_filter')
+        title_filter = self.request.GET.get('title_filter')
+
+        filters = False
+        query = Q()
+        
+        if tags_filter is not None and len(tags_filter):
+            query &= Q(tags__name=tags_filter)
+            filters = True
+
+        if title_filter is not None and len(title_filter):
+            query &= Q(title__icontains=title_filter)
+            filters = True
+
+        if filters:
+            new_context = Post.objects.filter(query)
             return new_context
+
         return super().get_queryset()
 
     def get_context_data(self, **kwargs):

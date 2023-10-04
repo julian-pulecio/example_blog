@@ -1,0 +1,29 @@
+{% extends "../base.html" %}
+
+{% block title %} Home {% endblock %}
+
+{% block template %}
+
+<div class="container mt-5">
+    <form hx-get="{% url 'blog.list' %}" hx-swap="outerHTML" hx-target="#search-results"
+        hx-trigger="change, keyup from .form-control">
+        <div class="form-group row my-4">
+            <div class="col-md-6">
+                {{form.tags_filter.label}}
+                {{form.tags_filter}}
+            </div>
+            <div class="col-md-6">
+                {{form.title_filter.label}}
+                {{form.title_filter}}
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div class="container">
+    <div hx-get="{% url 'blog.list' %}" hx-trigger="load, click delay:1s" hx-swap="innerHTML">
+    </div>
+</div>
+
+{% endblock %}
