@@ -1,4 +1,6 @@
 from typing import Any
+from django.db import models
+from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.contrib import messages
@@ -6,11 +8,10 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.views.generic.edit import FormMixin
 from django.urls import reverse
-from django.views.generic import ListView, DetailView, TemplateView, FormView
+from django.views.generic import ListView, DetailView, TemplateView, FormView, View
 from django.db.models import Q
 from .forms import PostShareForm, PostFilterListForm, CreateCommentForm
 from .models import Post, Comment
-
 
 
 class PostListFiltersView(FormView):
@@ -54,31 +55,29 @@ class PostDetailView(DetailView):
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        context['create_comment_form'] = CreateCommentForm
-        context['post_share_form'] = PostShareForm
+        context['slug'] = self.kwargs['slug']
         return context
 
-    def post(self, request:HttpRequest, *args:str, **kwargs:Any) -> HttpResponse:
-        self.object = self.get_object() 
-        context = self.get_context_data(**kwargs)
+class CommentSectionView(TemplateView):
+    template_name = 'post/post_comment_section.html'
 
-        if 'comment' in request.POST:
-            comment_form = CreateCommentForm(request.POST)
-            context['create_comment_form'] = comment_form
-            if comment_form.is_valid():
-                new_comment = comment_form.save(commit=False)
-                new_comment.post = self.object
-                new_comment.save()
-                messages.success(self.request, 'Form submission successful', extra_tags='comment_form')
-                return HttpResponseRedirect(self.object.get_absolute_url())
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['object_list'] = Comment.objects.filter(post__slug=kwargs['slug'])
+        context['form'] = CreateCommentForm
+        return context
 
-        if 'share' in request.POST:
-            share_form = PostShareForm(request.POST)
-            context['post_share_form'] = share_form    
-            if share_form.is_valid():
-                share_form.send_email(self.request.build_absolute_uri())
-                messages.success(self.request, 'Form submission successful', extra_tags='share_form')
-                return HttpResponseRedirect(self.object.get_absolute_url())
-        
-        
-        return self.render_to_response(context)
+    def post(self, request, *args, **kwargs):
+        print(kwargs['slug'])
+        form = CreateCommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = Post.objects.filter(slug=kwargs['slug'])[0]
+            comment.save()
+            return HttpResponseRedirect(reverse('blog.comments', args=[kwargs['slug']]))
+        return render(
+            request, self.template_name, {
+                'form': form,
+                'slug':kwargs['slug'],
+                'object_list': Comment.objects.filter(post__slug=kwargs['slug'])
+            })

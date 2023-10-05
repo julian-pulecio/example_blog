@@ -22,7 +22,7 @@ class CommentFactory(factory.django.DjangoModelFactory):
 class PostFactory(factory.django.DjangoModelFactory):
     title = factory.Faker('sentence', nb_words=12)
     sub_title = factory.Faker('sentence', nb_words=12)
-    content = factory.Faker('paragraph', nb_sentences=5)
+    content = factory.Faker('paragraph', nb_sentences=200)
     author = factory.SubFactory(UserFactory)
 
     class Meta:
@@ -31,8 +31,6 @@ class PostFactory(factory.django.DjangoModelFactory):
 
     @factory.post_generation
     def tags(self, create, extracted, **kargs):
-        print('extracted')
-        print(extracted)
         if not create:
             return 
         if not extracted:

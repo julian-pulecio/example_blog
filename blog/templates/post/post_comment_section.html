@@ -1,0 +1,22 @@
+{% extends "../base.html" %}
+
+{% block title %} Home {% endblock %}
+
+{% block template %}
+
+<div id="comment-section">
+
+{% for comment in object_list %}
+    <h6>{{comment.email}}</h6>
+    <p>{{comment.content}}</p>
+{% endfor %}
+
+{{slug}}
+
+<form hx-post="{% url 'blog.comments' slug=slug %}" hx-swap="outerHTML" hx-target="#comment-section" novalidate>
+    {% csrf_token %}
+    {{form}}
+    <button type="submit" class="submit">submit</button>
+</form>
+</div>
+{% endblock %}

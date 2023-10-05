@@ -5,16 +5,12 @@ from taggit.models import Tag
 from .models import Comment
 
 
-class CustomCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
-    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
-        option = super().create_option(name, value, label, selected, index, subindex, attrs)
-        option['attrs']['hx-trigger'] = 'change'
-        option['attrs']['hx-swap'] = 'outerHTML'
-        option['attrs']['hx-target'] = '#search-results'
-        return option
-
 class PostShareForm(forms.Form):
-    email = forms.EmailField(max_length=255, widget=forms.TextInput())
+    email = forms.EmailField(
+        max_length=255, widget=forms.TextInput({
+            'class':'form-control'
+        })
+    )
 
     def send_email(self, post_url):
         return send_mail(
@@ -46,7 +42,17 @@ class PostFilterListForm(forms.Form):
 
 
 class CreateCommentForm(forms.ModelForm):
-    email = forms.EmailField(max_length=255, widget=forms.TextInput())
+    email = forms.EmailField(
+        max_length=255, widget=forms.TextInput({
+            'class':'form-control'   
+        }),
+    ),
+    content = forms.CharField(
+        max_length=255, widget=forms.Textarea({
+            'class':'form-control',
+            'rows':3   
+        })
+    )
     class Meta:
         model = Comment
         fields = ['email','content']

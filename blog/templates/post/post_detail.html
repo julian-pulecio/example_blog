@@ -1,49 +1,15 @@
-<h1>{{object.title}}</h1>
-<p>{{object.sub_title}}</p>
-<p>{{object.content}}</p>
+{% extends "../base.html" %}
 
-{% for comment in object.comments.all %}
-    <p>{{comment.email}}</p>
-    <p>{{comment.content}}</p>
-{% endfor %}
+{% block title %} Home {% endblock %}
 
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-        {% if 'comment_form' in message.tags %}
-        <li  {% if message.tags %} class=" {{ message.tags }} " {% endif %}> {{ message }} </li>
-        {% endif %}
-    {% endfor %}
-</ul>
-{% endif %}
-<form method="post">
-    {{create_comment_form.errors}}
-    {% csrf_token %}
-    {% for field in create_comment_form %}
-    <div class="fieldWrapper">
-        {{ field.errors }}
-        {{ field.label_tag }} {{ field }}
+{% block template %}
+
+    <div class="container">
+        <h1>{{object.title}}</h1>
+        <h4>{{object.sub_title}}</h4>
+        <p>{{object.content}}</p>
     </div>
-    {% endfor %}
-    <button type="submit" name="comment">send</button>
-</form>
+        
+    <div hx-get="{% url 'blog.comments' slug=slug %}" hx-trigger="load"  hx-swap="innerHTML"></div>
 
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-        {% if 'share_form' in message.tags %}
-        <li  {% if message.tags %} class=" {{ message.tags }} " {% endif %}> {{ message }} </li>
-        {% endif %}
-    {% endfor %}
-</ul>
-{% endif %}
-<form method="post">
-    {% csrf_token %}
-    {% for field in post_share_form %}
-    <div class="fieldWrapper">
-        {{ field.errors }}
-        {{ field.label_tag }} {{ field }}
-    </div>
-    {% endfor %}
-    <button type="submit" name="share">send</button>
-</form>
+{% endblock %}
