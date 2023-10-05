@@ -4,19 +4,18 @@
 
 {% block template %}
 
-<div id="comment-section">
+<div class="container" id="comment-section">
 
-{% for comment in object_list %}
+    {% for comment in object_list %}
     <h6>{{comment.email}}</h6>
     <p>{{comment.content}}</p>
-{% endfor %}
+    {% endfor %}
 
-{{slug}}
-
-<form hx-post="{% url 'blog.comments' slug=slug %}" hx-swap="outerHTML" hx-target="#comment-section" novalidate>
-    {% csrf_token %}
-    {{form}}
-    <button type="submit" class="submit">submit</button>
-</form>
+    <form hx-post="{% url 'blog.comments' slug=slug %}" hx-swap="outerHTML" hx-target="#comment-section" novalidate>
+        {% csrf_token %}
+        {{form.as_div}}
+        <button type="submit" class="btn btn-primary my-2 submit">submit</button>
+    </form>
+    
 </div>
 {% endblock %}

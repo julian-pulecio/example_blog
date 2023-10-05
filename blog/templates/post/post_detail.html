@@ -5,11 +5,13 @@
 {% block template %}
 
     <div class="container">
-        <h1>{{object.title}}</h1>
-        <h4>{{object.sub_title}}</h4>
-        <p>{{object.content}}</p>
+        <div class="my-5">
+            <h1>{{object.title}}</h1>
+            <h4>{{object.sub_title}}</h4>
+        </div>
+        <p class="mb-4">{{object.content}}</p>
     </div>
         
-    <div hx-get="{% url 'blog.comments' slug=slug %}" hx-trigger="load"  hx-swap="innerHTML"></div>
+    <div class="container" hx-get="{% url 'blog.comments' slug=slug %}" hx-trigger="load"  hx-swap="innerHTML"></div>
 
 {% endblock %}

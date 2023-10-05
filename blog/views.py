@@ -10,7 +10,7 @@ from django.views.generic.edit import FormMixin
 from django.urls import reverse
 from django.views.generic import ListView, DetailView, TemplateView, FormView, View
 from django.db.models import Q
-from .forms import PostShareForm, PostFilterListForm, CreateCommentForm
+from .forms import PostFilterListForm, CreateCommentForm
 from .models import Post, Comment
 
 
@@ -68,7 +68,6 @@ class CommentSectionView(TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        print(kwargs['slug'])
         form = CreateCommentForm(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
